@@ -1,0 +1,10 @@
+.DS_Store
+.idea
+.yardoc
+.bundle
+pkg
+doc
+.ruby-version
+.rbenv-version
+*.gem
+Gemfile.lock
