@@ -13,6 +13,24 @@ module ActiveModel
       def default_options
         DEFAULT_OPTIONS.merge(@default_options || {})
       end
+
+      # returns the phone field formatted as to international (country code prefixed)
+      # 0) return nil if the phone field is nil
+      # 1) call :before_normalize Proc, if given
+      # 2) strip all spaces and non-digit chars
+      # 3) remove leading zeroes
+      # 4) add country code if not already present
+      def normalize(value, cc, options = {})
+        return nil unless value
+        hook = options[:before_normalize]
+        value = value.to_s
+        value = hook.call(value) if hook && hook.is_a?(Proc)
+        value = value.scan(/\d+/).join
+        value = value.gsub(/^0+/,'')
+        value.match(/^#{cc}/) ? value : cc + value
+        # I tried Phony.normalize here, but seems to doesn't convert national to intl automatically
+        # Phony.normalize(out, cc)
+      end
     end
 
     included do
@@ -45,25 +63,10 @@ module ActiveModel
 
       def define_normalization_getter(klass, attr, options = {})
         klass.class_eval do
-
-          # returns the phone field formatted as to international (country code prefixed)
-          # 0) return nil if the phone field is nil
-          # 1) call :before_normalize Proc, if given
-          # 2) strip all spaces and non-digit chars
-          # 3) remove leading zeroes
-          # 4) add country code if not already present
           self.send(:define_method, :"#{attr}_normalize") do
-            return nil unless out = self.send(attr)
-            out = out.to_s
-            hook = options[:before_normalize]
-            out = hook.call(out) if hook && hook.is_a?(Proc)
-            out = out.scan(/\d+/).join
-            out = out.gsub(/^0+/,'')
-            cc = self.send(:"#{attr}_cc")
-            out.match(/^#{cc}/) ? out : cc + out
-
-            # I tried Phony.normalize here, but seems to doesn't convert national to intl automatically
-            # Phony.normalize(out, cc: self.send(:"#{attr}_cc"))
+            value = self.send(attr)
+            cc    = self.send(:"#{attr}_cc")
+            ActiveModel::Phone.normalize(value, cc, options)
           end
         end
       end
