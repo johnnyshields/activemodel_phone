@@ -1,3 +1,7 @@
 require 'phony'
-require 'active_model/phone'
+require 'active_model/phone/options'
+require 'active_model/phone/attr_phone'
+require 'active_model/phone/normalize'
+require 'active_model/phone/definitions'
 require 'active_model/phone/version'
+require 'active_model/phone'
