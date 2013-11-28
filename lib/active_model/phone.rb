@@ -64,9 +64,7 @@ module ActiveModel
       def define_normalization_getter(klass, attr, options = {})
         klass.class_eval do
           self.send(:define_method, :"#{attr}_normalize") do
-            value = self.send(attr)
-            cc    = self.send(:"#{attr}_cc")
-            ActiveModel::Phone.normalize(value, cc, options)
+            ActiveModel::Phone.normalize(self.send(attr), self.send(:"#{attr}_cc"), options)
           end
         end
       end
