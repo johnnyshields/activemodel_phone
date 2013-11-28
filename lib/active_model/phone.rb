@@ -32,16 +32,18 @@ module ActiveModel
       def define_attr_phone(klass, attr, options={})
         options = ActiveModel::Phone.default_options.merge(options)
         phony_options = options.slice(PHONY_PASSTHRU_OPTIONS)
-        define_cc_accessor(klass, attr, options)
-        define_format_accessor(klass, attr, phony_options)
-        define_preformatted_accessors(klass, attr)
+        define_cc_getter(klass, attr, options)
+        define_cc_setter(klass, attr)
+        define_formatted_getter(klass, attr, phony_options)
+        define_preformatted_getters(klass, attr)
         define_preformatted_aliases(klass, attr)
-        define_normalization(klass, attr, options)
+        define_normalization_getter(klass, attr, options)
+        define_normalization_mutator(klass, attr, options)
         define_normalization_callback(klass, attr, options)
         define_validation(klass, attr, options)
       end
 
-      def define_normalization(klass, attr, options = {})
+      def define_normalization_getter(klass, attr, options = {})
         klass.class_eval do
 
           # returns the phone field formatted as to international (country code prefixed)
@@ -63,7 +65,11 @@ module ActiveModel
             # I tried Phony.normalize here, but seems to doesn't convert national to intl automatically
             # Phony.normalize(out, cc: self.send(:"#{attr}_cc"))
           end
+        end
+      end
 
+      def define_normalization_mutator(klass, attr, options = {})
+        klass.class_eval do
           # mutates the phone field method
           self.send(:define_method, :"#{attr}_normalize!") do
             self.send(:"#{attr}=", self.send(:"#{attr}_normalize"))
@@ -87,7 +93,7 @@ module ActiveModel
         end
       end
 
-      def define_format_accessor(klass, attr, default_options = {})
+      def define_formatted_getter(klass, attr, default_options = {})
         klass.class_eval do
           self.send(:define_method, :"#{attr}_format") do |options = {}|
             options = default_options.merge(options)
@@ -96,7 +102,7 @@ module ActiveModel
         end
       end
 
-      def define_preformatted_accessors(klass, attr)
+      def define_preformatted_getters(klass, attr)
         PREFORMATTED_METHODS.each do |scope, format|
           klass.class_eval do
             self.send(:define_method, :"#{attr}_#{scope}") do
@@ -115,13 +121,18 @@ module ActiveModel
         end
       end
 
-      def define_cc_accessor(klass, attr, options)
+      def define_cc_getter(klass, attr, options)
         klass.class_eval do
           unless self.method_defined?(:"#{attr}_cc")
             self.send(:define_method, :"#{attr}_cc") do
               self.instance_variable_get(:"@#{attr}_cc") || options[:default_cc]
             end
           end
+        end
+      end
+      
+      def define_cc_setter(klass, attr)
+        klass.class_eval do
           unless self.method_defined?(:"#{attr}_cc=")
             self.send(:attr_writer, :"#{attr}_cc")
           end
