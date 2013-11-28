@@ -31,6 +31,10 @@ module ActiveModel
         # I tried Phony.normalize here, but seems to doesn't convert national to intl automatically
         # Phony.normalize(out, cc)
       end
+
+      def normalize_attr(instance, attr, options = {})
+        normalize(instance.send(attr), instance.send(:"#{attr}_cc"), options)
+      end
     end
 
     included do
@@ -64,7 +68,7 @@ module ActiveModel
       def define_normalization_getter(klass, attr, options = {})
         klass.class_eval do
           self.send(:define_method, :"#{attr}_normalize") do
-            ActiveModel::Phone.normalize(self.send(attr), self.send(:"#{attr}_cc"), options)
+            ActiveModel::Phone.normalize_attr(self, attr, options)
           end
         end
       end
