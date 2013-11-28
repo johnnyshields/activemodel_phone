@@ -2,7 +2,7 @@
 [![Build Status](https://secure.travis-ci.org/johnnyshields/activemodel_phone.png)](https://travis-ci.org/johnnyshields/activemodel_phone)
 [![Code Climate](https://codeclimate.com/github/johnnyshields/activemodel_phone.png)](https://codeclimate.com/github/johnnyshields/activemodel_phone)
 
-A lightweight, opinionated ActiveModel attribute wrapper for phone numbers, using the (Phony)[https://github.com/floere/phony] gem.
+A lightweight, opinionated ActiveModel attribute wrapper for phone numbers, using the [Phony](https://github.com/floere/phony) gem.
 
 This gem is the "glue" between Phony and your model class. It provides a single `attr_phone` method which should cover 90% of use cases by itself.
 
@@ -72,7 +72,7 @@ The `attr_phone` method does the following:
    * `{field}_natl`: 080-1234-5678
    * `{field}_local`: 1234-5678
    * `{field}_cc`: 81 **(not yet working based on raw value)**
-   * Refer to (Phony)[https://github.com/floere/phony] documentation for an explanation of "national" versus "international" formats
+   * Refer to [Phony](https://github.com/floere/phony) documentation for an explanation of "national" versus "international" formats
 
 * Defines mutators `{field}_intl=`, `{field}_natl=`, and `{field}_local=` which are aliased to `{field}=`
 
@@ -124,17 +124,17 @@ bob.phone_format!            # formats phone as international, assuming country 
 
 ## Alternatives
 
-* The (Phony Rails)[https://github.com/joost/phony_rails] gem add a Swiss-army knife set of validators and helpers. Was a bit heavy for my use case.
-* Roll your own with (Phony)[https://github.com/floere/phony] itself.
+* The [Phony Rails](https://github.com/joost/phony_rails) gem add a Swiss-army knife set of validators and helpers. Was a bit heavy for my use case.
+* Roll your own with [Phony](https://github.com/floere/phony) itself.
 
 
 ## Compatibility
 
 ActiveModel::Phone is compatible any ActiveModel-based ORM/ODM library, including:
 
-* (ActiveRecord)[https://github.com/rails/rails/tree/master/activerecord]
-* (Mongoid)[https://github.com/mongoid/mongoid]
-* (ActiveAttr)[https://github.com/cgriego/active_attr]
+* [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord)
+* [Mongoid](https://github.com/mongoid/mongoid)
+* [ActiveAttr](https://github.com/cgriego/active_attr)
 
 ActiveModel::Phone is tested on the following versions:
 
