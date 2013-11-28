@@ -4,6 +4,15 @@
 
 A lightweight, opinionated ActiveModel attribute wrapper for phone numbers, using the (Phony)[https://github.com/floere/phony] gem.
 
+This gem is the "glue" between Phony and your model class. It provides a single `attr_phone` method which should cover 90% of use cases by itself.
+
+
+## Under Construction
+
+This gem is still experimental. Most features are working as designed, **EXCEPT** country code handling needs improvement.
+The gem works best when you use only one country code across your entire app, and is not yet using
+Phony's built-in `normalize` method. Anyone who can raise a PR to help, it would be much appreciated.
+
 
 ## Install
 
@@ -19,25 +28,50 @@ In your model:
 class Person
   include ActiveModel::Phone
 
-  # assumes presence of a database field or attr_accessor :phone
-  attr_phone :phone
+  # assumes presence of String-type database fields or attr_accessor :phone and :fax
+  attr_phone :phone, :fax
 end
 ```
 
-This will do the following:
+Example instance usage:
 
-* Adds a public `{field}_format!` method which converts the field value to international, all numeric without spaces which is appropriate for DB persistence.
+```ruby
+bob = Person.new
+bob.phone = '2061234567'
 
-* Before validation, calls the `_format!` method.
+bob.phone_normalize!
+bob.phone          #=> '12061234567'
 
-* Adds `validation` logic to ensure the number is all numeric without spaces.
+bob.phone_intl     #=> '1 206 123 4567'
+bob.phone_natl     #=> '206 123 4567'
+bob.phone_local    #=> '123 4567'
+
+bob.phone.valid?   #=> true
+bob.phone = '123'
+bob.phone.valid?   #=> false
+
+bob.phone_natl = '123456789'   # aliased to :phone=
+bob.phone          #=> '123456789'
+```
+
+Including the `ActiveModel::Phone` library automatically includes `ActiveModel::Validations`
+
+The `attr_phone` method does the following:
+
+* Adds a public `{field}_normalize!` method which converts the field value to international, all numeric without spaces which is appropriate for DB persistence.
+
+* Sets a `before_validation` callback to the `{field}_normalize!!` method, unless option `before_validation: false` or if not supported by the ORM library.
+
+* Unless option `validate: false`, adds validation logic to ensure:
+   * the number is all numeric without spaces.
+   * the number is a plausible phone number, according to Phony **(not yet working)**
 
 * Defines accessors:
    * assuming raw value is '818012345678'
    * `{field}_intl`: +81 80-1234-5678
    * `{field}_natl`: 080-1234-5678
    * `{field}_local`: 1234-5678
-   * `{field}_cc`: 81
+   * `{field}_cc`: 81 **(not yet working based on raw value)**
    * Refer to (Phony)[https://github.com/floere/phony] documentation for an explanation of "national" versus "international" formats
 
 * Defines mutators `{field}_intl=`, `{field}_natl=`, and `{field}_local=` which are aliased to `{field}=`
